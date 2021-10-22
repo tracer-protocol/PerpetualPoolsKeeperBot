@@ -2,7 +2,9 @@
 
 ## Running
 - Create a file called `pool_addresses` in the root branch, following the structure described below.
+- Create the virtual environment with `python3 -m venv env`
 - Start the virtual environment with `source env/bin/activate`
+- Install required libraries with `pip3 install -r requirements.txt`
 - Run with `./src/run_keeper.py [-u | --url] <RPC_URL> [-k | --keeper] <POOL_KEEPER_ADDRESS> [-p | --private_key] <PRIVATE_KEY>`
 
 ### pool_addresses
