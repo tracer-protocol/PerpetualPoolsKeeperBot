@@ -40,7 +40,7 @@ def parse(args: List[str]) -> Tuple[str, List[int]]:
             continue        
         try:
             operands.append(arg)
-        except ValueError:            
+        except ValueError:
             raise SystemExit(USAGE)
     
     for req in ["u", "p", "k"]:
