@@ -1,4 +1,4 @@
-#---!/bin/python3
+#!/bin/python3
 import sys
 import re
 import collections
