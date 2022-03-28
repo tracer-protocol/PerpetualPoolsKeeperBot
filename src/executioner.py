@@ -41,7 +41,12 @@ class Executioner(object):
         while True:
             print("Checking upkeep")
             print(f"Pools that need upkeep: {min_pools}")
-            self.loop_until_ready(min_pools[0])
+            start_time = time.time()
+            if not self.loop_until_ready(min_pools[0]):
+                pass
+                break
+            end_time = time.time()
+            print(end_time - start_time)
 
             try:
                 # There exists a function that allows you to pass in an array of pools,
@@ -70,7 +75,7 @@ class Executioner(object):
                 print(f"Checking upkeep failed with {e!r}")
             print("Not yet ready")
             time.sleep(1)
-        return True
+        return False
     
     def prepare(self):
         """Scan for the next pool to be upkept and sleep until it is ready
@@ -85,9 +90,10 @@ class Executioner(object):
 
         # Add a small amount of buffer to the sleep, because I have noticed some weird stuff happening
         # with the timestamp where local time vs Arbitrum One timestamp gets offput by a small amount.
+        print(min_pools[0])
         if minimum_wait_time > 0:
-            print(f"sleeping for {minimum_wait_time + 10}")
-            time.sleep(minimum_wait_time + 10)
+            print(f"sleeping for {minimum_wait_time + 300}")
+            time.sleep(minimum_wait_time + 400)
 
         # Do it again in case more can be upkept
         try:
