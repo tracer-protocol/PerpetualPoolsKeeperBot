@@ -7,6 +7,7 @@ from web3 import Web3
 
 from leveraged_pool import LeveragedPool
 from pool_keeper import PoolKeeper
+from pool_factory import PoolFactory
 from executioner import Executioner
 
 USAGE = (f"Usage: {sys.argv[0]} "
@@ -16,8 +17,6 @@ def parse(args: List[str]) -> Tuple[str, List[int]]:
     separator = "\n"
     operands: List[int] = []
     args = {}
-    if len(arguments) != 1 + 3 * 2:
-        raise SystemExit(USAGE)
     while arguments:
         arg = arguments.popleft()
         if arg == "--help":
@@ -33,12 +32,21 @@ def parse(args: List[str]) -> Tuple[str, List[int]]:
             continue
         if arg in ("-k", "--keeper"):
             keeper_address = arguments.popleft()
-            args["k"] = keeper_address
+            args["k"] = Web3.toChecksumAddress(keeper_address)
             continue
+        if arg in ("-f", "--factory"):
+            factory_address = arguments.popleft()
+            args["f"] = Web3.toChecksumAddress(factory_address)
+            continue        
         try:
             operands.append(arg)
         except ValueError:
             raise SystemExit(USAGE)
+    
+    for req in ["u", "p", "k"]:
+        if req not in args:
+            raise SystemExit(USAGE)    
+           
     return args
 
 if __name__ == "__main__":
@@ -48,12 +56,24 @@ if __name__ == "__main__":
     key = args["p"]
     keeper_address = args["k"]
 
-    # TODO add all pool addresses
-    f = open("pool_addresses", "r")
-    pool_list = f.read().split(",")
-    pool_list = list(map(lambda x: x.strip(), pool_list))
+    web3 = Web3(Web3.HTTPProvider(url))   
 
-    web3 = Web3(Web3.HTTPProvider(url))
+    pool_list = []
+    if "f" in args:
+        f = open("skip_pool_addresses", "r")
+        skip_pool_list = f.read().split(",")
+        skip_pool_list = list(map(lambda x: x.strip(), skip_pool_list))
+        
+        factory_address = args["f"]
+        factory = PoolFactory(web3, factory_address)
+        pool_list = factory.getPools()
+        pool_list=[pool for pool in pool_list if pool not in skip_pool_list]                
+    else:
+        f = open("pool_addresses", "r")
+        pool_list = f.read().split(",")
+        pool_list = list(map(lambda x: x.strip(), pool_list))
+
+
 
     pools = []
     for pool in pool_list:
