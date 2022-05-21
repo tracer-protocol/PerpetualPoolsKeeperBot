@@ -1,6 +1,7 @@
 from contract_utilities import fetch_build
 from web3 import Web3
 from eth_account import Account
+from eth_abi.packed import encode_abi_packed
 import hexbytes
 
 ABI_FILE = "./artifacts/PoolKeeper.json"
@@ -17,7 +18,7 @@ class PoolKeeper(object):
 
 
     def check_upkeep(self, address):
-        return self.contract.functions.checkUpkeepSinglePool(address).call()
+        return self.contract.functions.isUpkeepRequiredSinglePool(address).call()
 
     def tx_skeleton(self):
         nonce = self.w3.eth.getTransactionCount(self.wallet_address)
@@ -45,5 +46,12 @@ class PoolKeeper(object):
         tx_data = self.tx_skeleton()
 
         tx = self.contract.functions.performUpkeepMultiplePools(addresses).buildTransaction(tx_data)
+        self.send_and_process_tx(tx)
+
+    def perform_upkeep_multiple_pools_packed(self, addresses):
+        args = encode_abi_packed(["address"] * len(addresses), addresses)
+        tx_data = self.tx_skeleton()
+
+        tx = self.contract.functions.performUpkeepMultiplePoolsPacked(args).buildTransaction(tx_data)
         self.send_and_process_tx(tx)
 
